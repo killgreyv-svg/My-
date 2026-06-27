@@ -3,7 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { regions, zoneInfo } from "@/lib/regions";
-import { oblastPaths, UKRAINE_VIEWBOX } from "@/lib/ukraine-map-data";
+import { oblastPaths, regionLabelPositions, UKRAINE_VIEWBOX } from "@/lib/ukraine-map-data";
+
+function labelLines(name: string): string[] {
+  if (name.length <= 11) return [name.toUpperCase()];
+  const words = name.split(" ");
+  if (words.length === 1) return [name.toUpperCase()];
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(" ").toUpperCase(), words.slice(mid).join(" ").toUpperCase()];
+}
 
 export default function UkraineMap() {
   const router = useRouter();
@@ -64,6 +72,34 @@ export default function UkraineMap() {
                   strokeLinejoin="round"
                 />
               ))}
+              {(() => {
+                const pos = regionLabelPositions[region.slug];
+                if (!pos) return null;
+                const lines = labelLines(region.name);
+                const lineHeight = 9;
+                const startY = pos.y - ((lines.length - 1) * lineHeight) / 2;
+                return (
+                  <text
+                    x={pos.x}
+                    y={startY}
+                    textAnchor="middle"
+                    className="region-label"
+                    fontSize={8.5}
+                    fontWeight={700}
+                    fill="var(--cream)"
+                    stroke="rgba(0,0,0,0.35)"
+                    strokeWidth={0.4}
+                    paintOrder="stroke"
+                    style={{ pointerEvents: "none" }}
+                  >
+                    {lines.map((line, i) => (
+                      <tspan key={i} x={pos.x} dy={i === 0 ? 0 : lineHeight}>
+                        {line}
+                      </tspan>
+                    ))}
+                  </text>
+                );
+              })()}
             </g>
           );
         })}
