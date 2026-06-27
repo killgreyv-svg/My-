@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --maroon: #7a2b2e;
+  --maroon-dark: #5c1f22;
+  --cream: #f4ecdf;
+  --ink: #2b1f1c;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-maroon: var(--maroon);
+  --color-maroon-dark: var(--maroon-dark);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --font-logo: var(--font-logo);
+  --font-body: var(--font-body);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.font-logo {
+  font-family: var(--font-logo), serif;
+}
+
+/* Stylized interactive map of Ukraine's culinary regions, arranged
+   to loosely echo each region's real-world position. */
+.ukraine-map {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(86px, 1fr));
+  grid-template-areas:
+    ".          volyn        polissya     .              sivershchyna ."
+    "halychyna  podillya     .            naddniprianshchyna poltavshchyna slobozhanshchyna"
+    "zakarpattya karpaty     bessarabiya  .              dnipro       pryazovya"
+    ".          .            .            prychornomorya tavriya      .";
+  gap: 0.6rem;
+}
+
+@media (max-width: 720px) {
+  .ukraine-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-template-areas: none;
+  }
+  .ukraine-map .map-tile {
+    grid-area: auto !important;
+  }
+}
+
+.map-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 0.9rem;
+  padding: 0.5rem 0.4rem;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.map-tile:hover,
+.map-tile:focus-visible {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
+  filter: brightness(1.08);
+  z-index: 2;
+}
+
+.map-tile .dish {
+  display: block;
+  font-weight: 400;
+  font-size: 0.62rem;
+  opacity: 0.85;
+  margin-top: 0.15rem;
+}
+
+.ribbon {
+  position: relative;
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    92% 50%,
+    100% 100%,
+    0% 100%,
+    8% 50%
+  );
 }
