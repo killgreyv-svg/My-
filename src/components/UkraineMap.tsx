@@ -5,12 +5,21 @@ import { useMemo, useState } from "react";
 import { regions, zoneInfo } from "@/lib/regions";
 import { oblastPaths, regionLabelPositions, UKRAINE_VIEWBOX } from "@/lib/ukraine-map-data";
 
-function labelLines(name: string): string[] {
-  if (name.length <= 11) return [name.toUpperCase()];
-  const words = name.split(" ");
-  if (words.length === 1) return [name.toUpperCase()];
-  const mid = Math.ceil(words.length / 2);
-  return [words.slice(0, mid).join(" ").toUpperCase(), words.slice(mid).join(" ").toUpperCase()];
+function wrapWords(text: string, maxLen: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let line = "";
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (candidate.length > maxLen && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
 }
 
 export default function UkraineMap() {
@@ -75,29 +84,53 @@ export default function UkraineMap() {
               {(() => {
                 const pos = regionLabelPositions[region.slug];
                 if (!pos) return null;
-                const lines = labelLines(region.name);
-                const lineHeight = 9;
-                const startY = pos.y - ((lines.length - 1) * lineHeight) / 2;
+                const nameLines = wrapWords(region.name.toUpperCase(), 13);
+                const dish = region.dishes.find((d) => d.signature) ?? region.dishes[0];
+                const dishLines = wrapWords(dish.name, 18);
+                const nameLineHeight = 9.5;
+                const dishLineHeight = 7.5;
+                const gap = 2.5;
+                const totalHeight =
+                  nameLines.length * nameLineHeight + gap + dishLines.length * dishLineHeight;
+                const y = pos.y - totalHeight / 2 + nameLineHeight * 0.8;
                 return (
-                  <text
-                    x={pos.x}
-                    y={startY}
-                    textAnchor="middle"
-                    className="region-label"
-                    fontSize={8.5}
-                    fontWeight={700}
-                    fill="var(--cream)"
-                    stroke="rgba(0,0,0,0.35)"
-                    strokeWidth={0.4}
-                    paintOrder="stroke"
-                    style={{ pointerEvents: "none" }}
-                  >
-                    {lines.map((line, i) => (
-                      <tspan key={i} x={pos.x} dy={i === 0 ? 0 : lineHeight}>
-                        {line}
-                      </tspan>
-                    ))}
-                  </text>
+                  <g style={{ pointerEvents: "none" }}>
+                    <text
+                      x={pos.x}
+                      y={y}
+                      textAnchor="middle"
+                      fontFamily="var(--font-logo)"
+                      fontSize={9}
+                      fontWeight={700}
+                      fill="var(--ink)"
+                      stroke="var(--cream)"
+                      strokeWidth={2}
+                      paintOrder="stroke"
+                    >
+                      {nameLines.map((line, i) => (
+                        <tspan key={i} x={pos.x} dy={i === 0 ? 0 : nameLineHeight}>
+                          {line}
+                        </tspan>
+                      ))}
+                    </text>
+                    <text
+                      x={pos.x}
+                      y={y + (nameLines.length - 1) * nameLineHeight + gap + dishLineHeight}
+                      textAnchor="middle"
+                      fontFamily="var(--font-body)"
+                      fontSize={6.5}
+                      fill="var(--ink)"
+                      stroke="var(--cream)"
+                      strokeWidth={1.6}
+                      paintOrder="stroke"
+                    >
+                      {dishLines.map((line, i) => (
+                        <tspan key={i} x={pos.x} dy={i === 0 ? 0 : dishLineHeight}>
+                          {line}
+                        </tspan>
+                      ))}
+                    </text>
+                  </g>
                 );
               })()}
             </g>
